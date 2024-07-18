@@ -1,0 +1,68 @@
+{
+    "foods": [
+        {
+            "name": "Food 1",
+            "ingredients": [
+                {
+                    "name": "Ingredient 1",
+                    "macros": {
+                        "proteins": 20,
+                        "carbs": 20,
+                        "calories": 200,
+                        "fat": 20
+                    }
+                },
+                {
+                    "name": "Ingredient 2",
+                    "macros": {
+                        "proteins": 20,
+                        "carbs": 20,
+                        "calories": 200,
+                        "fat": 20
+                    }
+                }
+            ],
+            "total": {
+                "proteins": 40,
+                "carbs": 40,
+                "calories": 400,
+                "fat": 40
+            }
+        },
+        {
+            "name": "Food 2",
+            "ingredients": [
+                {
+                    "name": "Ingredient 1",
+                    "macros": {
+                        "proteins": 20,
+                        "carbs": 20,
+                        "calories": 200,
+                        "fat": 20
+                    }
+                },
+                {
+                    "name": "Ingredient 2",
+                    "macros": {
+                        "proteins": 20,
+                        "carbs": 20,
+                        "calories": 200,
+                        "fat": 20
+                    }
+                }
+            ],
+            "total": {
+                "proteins": 40,
+                "carbs": 40,
+                "calories": 400,
+                "fat": 40
+            }
+        }
+    ],
+    "total": {
+        "proteins": 80,
+        "carbs": 80,
+        "calories": 800,
+        "fat": 80
+    }
+}
