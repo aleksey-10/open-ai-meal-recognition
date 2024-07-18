@@ -149,7 +149,7 @@ export default function Index() {
                                 Proteins: {macros.proteins}g
                               </li>
                               <li className="mb-1">Carbs: {macros.carbs}g</li>
-                              <li className="mb-1">Fat: {macros.fat}g</li>
+                              <li className="mb-1">Fats: {macros.fats}g</li>
                             </ul>
                           </div>
                         )
@@ -170,7 +170,7 @@ export default function Index() {
                       Proteins: {analysis.total.proteins}g
                     </li>
                     <li className="mb-1">Carbs: {analysis.total.carbs}g</li>
-                    <li className="mb-1">Fat: {analysis.total.fat}g</li>
+                    <li className="mb-1">Fats: {analysis.total.fats}g</li>
                   </ul>
                 </div>
               </div>

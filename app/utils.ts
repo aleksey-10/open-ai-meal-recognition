@@ -8,7 +8,7 @@ interface NutritionInfo {
   proteins: number;
   carbs: number;
   calories: number;
-  fat: number;
+  fats: number;
 }
 
 interface Ingredient {
@@ -33,70 +33,47 @@ export async function recognizeFoodMacros({
   language: 'en' | 'zh';
 }): Promise<{
   response: ChatCompletion;
-  data: { foods: Food[]; total: NutritionInfo };
+  data: { foods: Food[]; total: NutritionInfo } | null;
 }> {
+  //'Analyze the image. First, list the ingredients you can recognize in the food. Then, for each ingredient, provide the estimated macros (proteins, carbs, fats) and calories. Format the response as follows:\nIngredients:\n- Ingredient 1: Protein: Xg, Carbs: Xg, Fat: Xg, Calories: X\n- Ingredient 2: Protein: Xg, Carbs: Xg, Fat: Xg, Calories: X\n...Summary: Protein: Xg, Carbs: Xg, Fat: Xg, Calories: X';
+
   const exampleJson = `{
-      "foods": [
+    "foods": [
+      {
+        "name": "Food1",
+        "ingredients": [
           {
-              "name": "Food name 1",
-              "ingredients": [
-                  {
-                      "name": "Ingredient 1",
-                      "macros": {
-                          "proteins": 20,
-                          "carbs": 20,
-                          "calories": 200,
-                          "fat": 20
-                      }
-                  },
-                  {
-                      "name": "Ingredient 2",
-                      "macros": {
-                          "proteins": 20,
-                          "carbs": 20,
-                          "calories": 200,
-                          "fat": 20
-                      }
-                  }
-              ],
+            "name": "Ing1",
+            "m": {
+              "p": 10,
+              "c": 10,
+              "f": 10,
+              "cal": 100
+            }
           },
           {
-              "name": "Food name 1",
-              "ingredients": [
-                  {
-                      "name": "Ingredient 1",
-                      "macros": {
-                          "proteins": 20,
-                          "carbs": 20,
-                          "calories": 200,
-                          "fat": 20
-                      }
-                  },
-                  {
-                      "name": "Ingredient 2",
-                      "macros": {
-                          "proteins": 20,
-                          "carbs": 20,
-                          "calories": 200,
-                          "fat": 20
-                      }
-                  }
-              ],
+            "name": "Ing2",
+            "m": {
+              "p": 10,
+              "c": 10,
+              "f": 10,
+              "cal": 100
+            }
           }
-      ],
-      "total": {
-          "proteins": 40,
-          "carbs": 40,
-          "calories": 400,
-          "fat": 40
+        ]
       }
-    }`;
+    ],
+    "total": {
+      "p": 20,
+      "c": 20,
+      "f": 20,
+      "cal": 200
+    }
+  }`;
 
-  let prompt =
-    //'Analyze the image. First, list the ingredients you can recognize in the food. Then, for each ingredient, provide the estimated macros (proteins, carbs, fats) and calories. Format the response as follows:\nIngredients:\n- Ingredient 1: Protein: Xg, Carbs: Xg, Fat: Xg, Calories: X\n- Ingredient 2: Protein: Xg, Carbs: Xg, Fat: Xg, Calories: X\n...Summary: Protein: Xg, Carbs: Xg, Fat: Xg, Calories: X';
-    `Analyze the image. First, list the dishes you can see in the image and the ingredients you can recognize in each food. Then, for each ingredient, provide the estimated macros (proteins, carbs, fats) and calories. Format the response as following json ${
-      language === 'zh' ? ' in Mandarin Chinese' : ''
-    }: ${exampleJson}.`;
+  let prompt = `Analyze the image. List the dishes and ingredients you recognize. Provide estimated macros (proteins, carbs, fats) and calories for each ingredient. Format the response as JSON ${
+    language === 'zh' ? 'in Mandarin Chinese' : ''
+  }: ${exampleJson}`;
 
   if (description) {
     prompt += ` To make your response more accurate here is an additional description (Note: Regardless you see in the description keep the output format as described above): "${description}".`;
@@ -113,7 +90,6 @@ export async function recognizeFoodMacros({
         ],
       },
     ],
-    //max_tokens: 700,
     temperature: 0.5,
   });
 
@@ -130,7 +106,34 @@ function extractJSON(response: string) {
   if (jsonMatch && jsonMatch[1]) {
     try {
       // Parse and return the extracted JSON
-      return JSON.parse(jsonMatch[1].trim());
+      const parsedResponse = JSON.parse(jsonMatch[1].trim());
+
+      const foods: Food[] = parsedResponse.foods.map(
+        (food: {
+          name: string;
+          ingredients: { name: string; m: Record<string, number> }[];
+        }) => ({
+          name: food.name,
+          ingredients: food.ingredients.map(ingredient => ({
+            name: ingredient.name,
+            macros: {
+              proteins: ingredient.m.p,
+              carbs: ingredient.m.c,
+              fats: ingredient.m.f,
+              calories: ingredient.m.cal,
+            },
+          })),
+        })
+      );
+
+      const total: NutritionInfo = {
+        proteins: parsedResponse.total.p,
+        carbs: parsedResponse.total.c,
+        fats: parsedResponse.total.f,
+        calories: parsedResponse.total.cal,
+      };
+
+      return { foods, total };
     } catch (error) {
       console.error('Error parsing JSON:', error);
       return null;
